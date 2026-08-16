@@ -9,3 +9,18 @@
     --laser-red: #ff3b3b;
     --engine-green: #39ff14;
 }
+
+body {
+    font-family: 'Courier New', Courier, monospace, system-ui;
+    max-width: 750px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background: var(--space-bg);
+    color: var(--text-main);
+    background-image: 
+        radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
+    background-size: 550px 550px, 350px 350px, 250px 250px;
+    background-position: 0 0, 40px 60px, 130px, 270px;
+}
