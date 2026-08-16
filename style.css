@@ -166,3 +166,23 @@ textarea:focus {
     border-color: var(--neon-glow);
 }
 
+.quantum-output {
+    background: #0d0d18;
+    border-left: 4px solid var(--neon-glow);
+    padding: 20px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.7;
+    font-size: 14px;
+    border-top: 1px solid #1f1f38;
+    border-right: 1px solid #1f1f38;
+    border-bottom: 1px solid #1f1f38;
+}
+
+.section-header{
+    color: var(--neon-glow);
+    font-weight: bold;
+    margin: 15px 0 5px 0;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+}
