@@ -24,3 +24,32 @@ body {
     background-size: 550px 550px, 350px 350px, 250px 250px;
     background-position: 0 0, 40px 60px, 130px, 270px;
 }
+
+h2 {
+    color: var(--neon-glow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(0, 242, 255, 0.4);
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    margin-top: 0;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.telemetry-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    background: #e65100;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
