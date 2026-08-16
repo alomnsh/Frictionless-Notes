@@ -53,3 +53,20 @@ h2 {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+.console-panel {
+    background-color: var(--hull-bg);
+    padding: 25px;
+    border-radius: 12px;
+    border: 1px solid #2e2e4f;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+h3{
+    margin-top: 0;
+    font-size: 16px;
+    color: var(--neon-purple);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
