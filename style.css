@@ -22,7 +22,7 @@ body {
         radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px),
         radial-gradient(white, rgba(255,255,255,.1) 2px, transparent 40px);
     background-size: 550px 550px, 350px 350px, 250px 250px;
-    background-position: 0 0, 40px 60px, 130px, 270px;
+    background-position: 0 0, 40px 60px, 130px 270px;
 }
 
 h2 {
@@ -147,7 +147,7 @@ button:disabled {
 
 textarea {
     width: 100%;
-    height: 130 px;
+    height: 130px;
     background: var(--space-bg);
     color: #fff;
     border: 1px solid #2e2e4f;
@@ -185,4 +185,30 @@ textarea:focus {
     text-transform: uppercase;
     font-size: 12px;
     letter-spacing: 1px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    background: #e65100;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.output-box {
+    background: #0d0d18;
+    border-left: 4px solid var(--neon-glow);
+    padding: 20px;
+    border-radius: 0 8px 8px 0;
+    line-height: 1.7;
+    font-size: 14px;
+    border-top: 1px solid #1f1f38;
+    border-right: 1px solid #1f1f38;
+    border-bottom: 1px solid #1f1f38;
 }
