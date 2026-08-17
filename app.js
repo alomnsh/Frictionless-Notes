@@ -47,6 +47,8 @@ transcriptionEngine.onerror = (err) => { commsStatus.innerText = "Recording erro
 transcriptionEngine.onresult = (event) => {
     let runningInterimString = '';
     for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (!event.results[i] || !event.results[i][0]) continue;
+
         if (event.results[i].isFinal) {
             lectureTextBuffer += event.results[i].transcript + ' ';
         } else {
