@@ -58,3 +58,39 @@ audioCaptureUnit.onresult = (event) => {
 
 startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; audioCaptureUnit.start(); });
 stopBtn.addEventListener('click', () => { audioCaptureUnit.stop(); });
+
+//Text Summaries
+aiBtn.addEventListener('click', async () => {
+    const rawBuffer = transcriptView.value.trim();
+    if (!rawBuffer) return alert ("Please Record Some Notes First")
+
+    aiOutput.innerText = "Processing text locally on your device...";
+
+    try {
+        const extractionResults = await aiCoreModel(rawBuffer, { max_length: 70, min_length: 25 });
+        if (extractionResults && extractionResults && extractionResults.summary_text) {
+            const refinedText = extractionResults.summary_text;
+            const cleanSentences = refinedText.match(/[^.!?]+[.!?]+/g) || [refinedText];
+
+            let abstractParagraph = cleanSentences[0];
+            let operationalBullets = cleanSentences.slice(1);
+
+            if (operationalBullets.length === 0) operationalBullets = [refinedText];
+
+            let layoutDOM = `
+                <div class="section-header'>📝 Lecture Summary:</div>
+                <p style="margin: 0 0 16px 0; color: #d4d4d8;">${abstractParagraph.trim()}</p>
+                <div class="section-header">🎯 Key Points & Takeaways:</div>
+                <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
+            `;
+            operationalBullets.forEach (sentence => {
+                if (sentence.trim().length > 3) layoutDOM += `<li style="margin-bottom: 6px;">${sentence.trim()}</li>`;
+            });
+            layoutDOM += `</ul>`;
+            aiOutput.innerHTML = layoutDOM;
+        }
+    } catch (err) {
+        console.error(err);
+        aiOutput.innerText = 'An error occured while analyzing text'
+    }
+});
