@@ -6,16 +6,13 @@ let videoMediaStream = null;
 async function bootCoreSystem() {
     const badge = document.getElementById('ai-system-badge');
     const runButton = document.getElementById('ai-btn');
-    const commsStatus = document.getElementById('comms-status')
+    const commsStatus = document.getElementById('comms-status');
     try {
-        //Loads a 4-bit quantized verison
-        aiCoreModel = await window.pipeline('summarization', 'Xenova/distillbart-cnn-6-6', {
-            quantized: true,
-            revision: 'main',
-            file: 'quantized.onnx'
-        });
+        // Fetches a highly optimized model build straight into browser memory
+        aiCoreModel = await window.pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
         badge.style.borderColor = '#22c55e';
+        badge.style.background = '#1b5e20';
         badge.innerText = '✓ Local AI Engine Ready';
         runButton.disabled = false;
         commsStatus.innerText = 'Microphone status: Ready to record.';
