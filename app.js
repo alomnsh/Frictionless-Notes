@@ -24,3 +24,19 @@ async function bootCoreSystem() {
     }
 }
 setTimeout(bootCoreSystem, 400);
+
+//Setup Speech tracking modules
+const SpeechFramework = window.SpeechRecognition || window.webkitSpeechRecognition;
+const transcriptionEngine = new SpeechFramework();
+transcriptionEngine.continuous = true;
+transcriptionEngine.intermResults = true;
+transcriptionEngine.lang = 'en-US';
+
+const startBtn = document.getElementById('start-btn');
+const stopBtn = document.getElementById('stop-btn');
+const videoView = document.getElementById('lecture-video');
+const transcriptView = document.getElementById('transcript');
+const commsStatus = document.getElementById('comms-status');
+const aiBtn = document.getElementById('ai-btn');
+const aiOutput = document.getElementById('ai-output');
+const copyBtn = document.getElementById('copy-btn');
