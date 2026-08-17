@@ -94,3 +94,11 @@ aiBtn.addEventListener('click', async () => {
         aiOutput.innerText = 'An error occured while analyzing text'
     }
 });
+
+//Copy Button Function
+copyBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(aiOutput.innerText);
+    const originalLabel = copyBtn.innerText;
+    copyBtn.innerText = "Copied to clipboard!";
+    setTimeout(() => copyBtn.innerText = originalLabel, 1500);
+});
