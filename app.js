@@ -11,7 +11,8 @@ async function bootCoreSystem() {
         //Loads a 4-bit quantized verison
         aiCoreModel = await window.pipeline('summarization', 'Xenova/distillbart-cnn-6-6', {
             quantized: true,
-            revision: 'main'
+            revision: 'main',
+            file: 'quantized.onnx'
         });
 
         badge.style.borderColor = '#22c55e';
