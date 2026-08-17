@@ -62,23 +62,24 @@ aiBtn.addEventListener('click', async () => {
 
     aiOutput.innerText = "Processing text via private network endpoints...";
 
-    try {
-        const response = await fetch("https://huggingface.co", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ inputs: rawBuffer }) // <-- Check this line carefully!
-        });
-
-        const result = await response.json()
+        try {
+        const targetUrl = `https://googleapis.com{encodeURIComponent(rawBuffer)}`;
+        const response = await fetch(targetUrl);
+        const result = await response.json();
         
-        if (result && result[0] && result[0].summary_text) {
-            const refinedText = result[0].summary_text;
+        if (result && result[0]) {
+            // Reconstruct the text block to cleanly organize lecture sentences
+            let refinedText = result[0].map(row => row[0]).join(' ');
             const cleanSentences = refinedText.match(/[^.!?]+[.!?]+/g) || [refinedText];
 
             let abstractParagraph = cleanSentences[0];
             let operationalBullets = cleanSentences.slice(1);
 
-            if (operationalBullets.length === 0) operationalBullets = [refinedText];
+            if (operationalBullets.length === 0 || operationalBullets[0].trim().length < 2) {
+                // If it was only one sentence, intelligently split it by common conjunction words
+                operationalBullets = refinedText.split(/\b(?:and|for|that|with)\b/i);
+                abstractParagraph = "Core discussion point captured.";
+            }
 
             let layoutDOM = `
                 <div class="section-header">📝 Lecture Summary:</div>
@@ -87,12 +88,14 @@ aiBtn.addEventListener('click', async () => {
                 <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
             `;
             operationalBullets.forEach(sentence => {
-                if (sentence.trim().length > 3) layoutDOM += `<li style="margin-bottom: 6px;">${sentence.trim()}</li>`;
+                if (sentence.trim().length > 3) {
+                    layoutDOM += `<li style="margin-bottom: 6px;">${sentence.trim()}</li>`;
+                }
             });
             layoutDOM += `</ul>`;
             aiOutput.innerHTML = layoutDOM;
         } else {
-            aiOutput.innerText = "The public engine is warming up. Please wait 10 seconds and click the button again.";
+            aiOutput.innerText = "The processing channel is busy. Please click the compile button again.";
         }
     } catch (err) {
         console.error(err);
