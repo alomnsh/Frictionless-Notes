@@ -15,6 +15,41 @@
     </script>
 </head>
 <body>
-    
+
+    <h2>🛰️ FRICTIONLESS NOTES</h2>
+    <p class="subtitle">An open-source, private voice notepad that runs entirely in your browser</p>
+
+    <div id="ai-system-badge" class="telemetry-badge">Setting up local text analyzer...</div>
+
+    <!-- Step 1: Lecture Capture Feeds -->
+    <div class="card">
+        <h3> Lecture Recording Controls</h3>
+        <div class="button-group">
+            <button id="start-btn">Start Lecture Capture</button>
+            <button id="stop-btn" disabled>End Session</button>
+        </div>
+        <p id="comms-status" class="system-status">System status: Feeds offline.</p>
+        
+        <!-- Video Feed Container -->
+        <div class="video-container">
+            <video id="lecture-video" autoplay playsinline muted></video>
+            <div class="video-overlay">LIVE RECORDING FEED</div>
+        </div>
+
+        <textarea id="transcript" placeholder="Transcribed lecture notes will continuously stream into this terminal field during the session..."></textarea>
+    </div>
+
+    <!-- Step 2: Lecture Note Processor -->
+    <div class="card">
+        <h3>Lecture Summary Generator</h3>
+        <div class="button-group">
+            <button id="ai-btn" disabled>Compile Lecture Notes</button>
+            <button id="copy-btn" class="secondary-btn">Copy Study Guide</button>
+        </div>
+        
+        <div id="ai-output" class="output-box" style="margin-top: 15px;">Your core lecture summary and key study topics will appear here.</div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
