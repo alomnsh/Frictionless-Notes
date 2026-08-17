@@ -17,10 +17,10 @@ async function bootCoreSystem() {
         badge.style.borderColor = '#22c55e';
         badge.innerText = '✓ Local AI Engine Ready';
         runButton.disabled = false;
-        commsStatus.innerText = 'System Status: Channels ready for validation';
+        commsStatus.innerText = 'Microphone status: Ready to record.';
     } catch (err) {
         console.error(err);
-        badge.innerText = '❌ Code Compilation Faliure';
+        badge.innerText = '❌ Failed to load local analyzer tools';
     }
 }
 setTimeout(bootCoreSystem, 400);
@@ -34,9 +34,27 @@ transcriptionEngine.lang = 'en-US';
 
 const startBtn = document.getElementById('start-btn');
 const stopBtn = document.getElementById('stop-btn');
-const videoView = document.getElementById('lecture-video');
 const transcriptView = document.getElementById('transcript');
 const commsStatus = document.getElementById('comms-status');
 const aiBtn = document.getElementById('ai-btn');
 const aiOutput = document.getElementById('ai-output');
 const copyBtn = document.getElementById('copy-btn');
+
+audioCaptureUnit.onstart = () => { commsStatus.innerText = "Microphone status: Listening..."; startBtn.disabled = true; stopBtn.disabled = false; };
+audioCaptureUnit.onend = () => { commsStatus.innerText = "Microphone status: Stopped."; startBtn.disabled = false; stopBtn.disabled = true; };
+audioCaptureUnit.onerror = (err) => { commsStatus.innerText = "Recording error: " + err.error; };
+
+audioCaptureUnit.onresult = (event) => {
+    let runningInterimString = '';
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+            lectureTextBuffer += event.results[i].transcript + ' ';
+        } else {
+            runningInterimString += event.results[i].transcript;
+        }
+    }
+    transcriptView.value = lectureTextBuffer + runningInterimString;
+};
+
+startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; audioCaptureUnit.start(); });
+stopBtn.addEventListener('click', () => { audioCaptureUnit.stop(); });
