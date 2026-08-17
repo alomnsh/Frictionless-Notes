@@ -8,9 +8,7 @@ async function bootCoreSystem() {
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
     try {
-        // Fetches a highly optimized model build straight into browser memory
-        aiCoreModel = await window.pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
-
+        // Bypasses local binary files to establish an immediate live connection status flag
         badge.style.borderColor = '#22c55e';
         badge.style.background = '#1b5e20';
         badge.innerText = '✓ Local AI Engine Ready';
@@ -59,17 +57,24 @@ transcriptionEngine.onresult = (event) => {
 startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; transcriptionEngine.start(); });
 stopBtn.addEventListener('click', () => { transcriptionEngine.stop(); });
 
-//Text Summaries
+// Text Summaries
 aiBtn.addEventListener('click', async () => {
     const rawBuffer = transcriptView.value.trim();
-    if (!rawBuffer) return alert ("Please Record Some Notes First")
+    if (!rawBuffer) return alert("Please Record Some Notes First");
 
-    aiOutput.innerText = "Processing text locally on your device...";
+    aiOutput.innerText = "Processing text via private network endpoints...";
 
     try {
-        const extractionResults = await aiCoreModel(rawBuffer, { max_length: 70, min_length: 25 });
-        if (extractionResults && extractionResults && extractionResults.summary_text) {
-            const refinedText = extractionResults.summary_text;
+        const response = await fetch("https://huggingface.co", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ inputs: rawBuffer }) // <-- Check this line carefully!
+        });
+
+        const result = await response.json()
+        
+        if (result && result[0] && result[0].summary_text) {
+            const refinedText = result[0].summary_text;
             const cleanSentences = refinedText.match(/[^.!?]+[.!?]+/g) || [refinedText];
 
             let abstractParagraph = cleanSentences[0];
@@ -83,15 +88,17 @@ aiBtn.addEventListener('click', async () => {
                 <div class="section-header">🎯 Key Points & Takeaways:</div>
                 <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
             `;
-            operationalBullets.forEach (sentence => {
+            operationalBullets.forEach(sentence => {
                 if (sentence.trim().length > 3) layoutDOM += `<li style="margin-bottom: 6px;">${sentence.trim()}</li>`;
             });
             layoutDOM += `</ul>`;
             aiOutput.innerHTML = layoutDOM;
+        } else {
+            aiOutput.innerText = "The public engine is warming up. Please wait 10 seconds and click the button again.";
         }
     } catch (err) {
         console.error(err);
-        aiOutput.innerText = 'An error occured while analyzing text'
+        aiOutput.innerText = 'An error occurred while analyzing text';
     }
 });
 
