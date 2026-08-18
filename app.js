@@ -9,8 +9,12 @@ async function bootCoreSystem() {
     try {
         badge.innerText = '🤖 Downloading AI model...';
         
-        const pipeline = window.transformers.pipeline;
+        const pipeline = window.pipeline;
 
+        if (!pipeline) {
+            throw new Error("AI core module script is still initializing. Please wait 3 seconds and refresh.");
+        }
+        
         aiCoreModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
         badge.style.borderColor = '#22c55e';
