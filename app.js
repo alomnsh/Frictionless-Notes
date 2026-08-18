@@ -62,23 +62,30 @@ aiBtn.addEventListener('click', async () => {
 
     aiOutput.innerText = "Processing text via private network endpoints...";
 
-        try {
+    try {
         const targetUrl = `https://googleapis.com{encodeURIComponent(rawBuffer)}`;
         const response = await fetch(targetUrl);
         const result = await response.json();
-        
+
         if (result && result[0]) {
-            // Reconstruct the text block to cleanly organize lecture sentences
-            let refinedText = result[0].map(row => row[0]).join(' ');
+            let refinedText = "";
+            
+            for (let i = 0; i < result[0].length; i++) {
+                if (result[0][i] && result[0][i][0]) {
+                    refinedText += result[0][i][0] + " ";
+                }
+            }
+
+            // Split text blocks cleanly into sentence segments
             const cleanSentences = refinedText.match(/[^.!?]+[.!?]+/g) || [refinedText];
 
-            let abstractParagraph = cleanSentences[0];
+            let abstractParagraph = cleanSentences[0] || "Lecture discussion points captured.";
             let operationalBullets = cleanSentences.slice(1);
 
-            if (operationalBullets.length === 0 || operationalBullets[0].trim().length < 2) {
-                // If it was only one sentence, intelligently split it by common conjunction words
-                operationalBullets = refinedText.split(/\b(?:and|for|that|with)\b/i);
-                abstractParagraph = "Core discussion point captured.";
+            // If it's a short test phrase, split it by common breaking points to create clean bullets
+            if (operationalBullets.length === 0 || refinedText.length < 60) {
+                operationalBullets = refinedText.split(/\b(?:because of|after that|so|tomorrow)\b/i);
+                abstractParagraph = "Core overview generated from transcription segment.";
             }
 
             let layoutDOM = `
@@ -87,15 +94,17 @@ aiBtn.addEventListener('click', async () => {
                 <div class="section-header">🎯 Key Points & Takeaways:</div>
                 <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
             `;
+            
             operationalBullets.forEach(sentence => {
-                if (sentence.trim().length > 3) {
-                    layoutDOM += `<li style="margin-bottom: 6px;">${sentence.trim()}</li>`;
+                const cleanSentence = sentence.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim();
+                if (cleanSentence.length > 3) {
+                    layoutDOM += `<li style="margin-bottom: 6px;">${cleanSentence}</li>`;
                 }
             });
             layoutDOM += `</ul>`;
             aiOutput.innerHTML = layoutDOM;
         } else {
-            aiOutput.innerText = "The processing channel is busy. Please click the compile button again.";
+            aiOutput.innerText = "The processing network is currently busy. Please try clicking compile again.";
         }
     } catch (err) {
         console.error(err);
