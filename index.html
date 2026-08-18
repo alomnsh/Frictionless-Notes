@@ -8,10 +8,12 @@
     <!--Link to external Stylesheet-->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Native Script Interface Configurations -->
+    <!-- Load stable on-device AI tools -->
     <script type="module">
-        console.log("Frictionless Notes application interface booted successfully.");
+        import { pipeline } from 'https://jsdelivr.net';
+        window.pipeline = pipeline;
     </script>
+
 
 </head>
 <body>

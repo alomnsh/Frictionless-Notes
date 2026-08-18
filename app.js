@@ -1,14 +1,13 @@
 let aiCoreModel = null;
 let lectureTextBuffer = '';
-let videoMediaStream = null;
 
-//Initialize lightweight text processor
 async function bootCoreSystem() {
     const badge = document.getElementById('ai-system-badge');
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
     try {
-        // Bypasses local binary files to establish an immediate live connection status flag
+        aiCoreModel = await window.pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+
         badge.style.borderColor = '#22c55e';
         badge.style.background = '#1b5e20';
         badge.innerText = '✓ Local AI Engine Ready';
@@ -16,7 +15,7 @@ async function bootCoreSystem() {
         commsStatus.innerText = 'Microphone status: Ready to record.';
     } catch (err) {
         console.error(err);
-        badge.innerText = '❌ Failed to load local analyzer tools';
+        badge.innerText = `❌ Error: ${err.message || err}`;
     }
 }
 setTimeout(bootCoreSystem, 400);
@@ -73,13 +72,11 @@ aiBtn.addEventListener('click', async () => {
 
             const sentences = aiText.match(/[^.!?]+[.!?]*/g) || [aiText];
             
-            // The first sentence becomes short the summary
+            // The first sentence becomes the summary
             let summaryParagraph = sentences[0];
             
-            // The rest of the sentences automatically turn into clean key takeaways
             let takeawayBullets = sentences.slice(1);
-            
-            // If the AI kept it super short, give it a clean baseline bullet point
+
             if (takeawayBullets.length === 0) {
                 takeawayBullets = [aiText];
                 summaryParagraph = "Core discussion point extracted from lecture segment.";
@@ -95,7 +92,6 @@ aiBtn.addEventListener('click', async () => {
             takeawayBullets.forEach(bullet => {
                 let cleanBullet = bullet.trim();
                 if (cleanBullet.length > 3) {
-                    // Ensure each new point starts beautifully with a capital letter
                     cleanBullet = cleanBullet.charAt(0).toUpperCase() + cleanBullet.slice(1);
                     layoutDOM += `<li style="margin-bottom: 6px;">${cleanBullet}</li>`;
                 }
