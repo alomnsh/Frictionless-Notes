@@ -6,15 +6,19 @@ async function bootCoreSystem() {
     const badge = document.getElementById('ai-system-badge');
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
+    
+    // Check if the HTML global script tag has finished loading window.pipeline yet
+    if (!window.pipeline) {
+        badge.innerText = '📡 Connecting to AI Delivery Network...';
+        setTimeout(bootCoreSystem, 200);
+        return;
+    }
+
     try {
-        badge.innerText = '🤖 Downloading AI model...';
+        badge.innerText = '🤖 Downloading lightweight AI model...';
         
         const pipeline = window.pipeline;
 
-        if (!pipeline) {
-            throw new Error("AI core module script is still initializing. Please wait 3 seconds and refresh.");
-        }
-        
         aiCoreModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
         badge.style.borderColor = '#22c55e';
@@ -27,7 +31,8 @@ async function bootCoreSystem() {
         badge.innerText = `❌ Error: ${err.message || err}`;
     }
 }
-setTimeout(bootCoreSystem, 400);
+
+bootCoreSystem();
 
 //Setup Speech tracking modules
 const SpeechFramework = window.SpeechRecognition || window.webkitSpeechRecognition;
