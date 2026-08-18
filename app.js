@@ -1,18 +1,16 @@
 let aiCoreModel = null;
 let lectureTextBuffer = '';
 
+// Initialize lightweight text processor
 async function bootCoreSystem() {
     const badge = document.getElementById('ai-system-badge');
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
     try {
-        badge.innerText = '📡 Connecting to AI Delivery Network...';
+        badge.innerText = '🤖 Downloading AI model...';
         
-        const transformersModule = await import('https://unpkg.com');
-        const pipeline = transformersModule.pipeline;
+        const pipeline = targetpipeline || window.transformers.pipeline;
 
-        badge.innerText = '🤖 Downloading lightweight AI model...';
-        
         aiCoreModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
         badge.style.borderColor = '#22c55e';
