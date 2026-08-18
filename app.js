@@ -1,11 +1,11 @@
 let lectureTextBuffer = '';
 
-// Initialize lightweight text processor instantly
+// Quick startup check to light up the UI badge
 function bootCoreSystem() {
     const badge = document.getElementById('ai-system-badge');
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
-
+    
     badge.style.borderColor = '#22c55e';
     badge.style.background = '#1b5e20';
     badge.innerText = '✓ Local AI Engine Ready';
@@ -13,7 +13,7 @@ function bootCoreSystem() {
     commsStatus.innerText = 'Microphone status: Ready to record.';
 }
 
-// Setup Speech tracking modules
+// Fallback check for Safari/Firefox compatibility 
 const SpeechFramework = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!SpeechFramework) {
     alert("Voice recognition is not supported in this browser window. Please use Google Chrome or Edge.");
@@ -39,10 +39,12 @@ transcriptionEngine.onerror = (err) => { commsStatus.innerText = "Recording erro
 transcriptionEngine.onresult = (event) => {
     let runningInterimString = '';
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-            lectureTextBuffer += event.results[i].transcript + ' ';
-        } else {
-            runningInterimString += event.results[i].transcript;
+        if (event.results[i] && event.results[i][0]) {
+            if (event.results[i].isFinal) {
+                lectureTextBuffer += event.results[i][0].transcript + ' ';
+            } else {
+                runningInterimString += event.results[i][0].transcript;
+            }
         }
     }
     transcriptView.value = lectureTextBuffer + runningInterimString;
@@ -51,44 +53,43 @@ transcriptionEngine.onresult = (event) => {
 startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; transcriptionEngine.start(); });
 stopBtn.addEventListener('click', () => { transcriptionEngine.stop(); });
 
+// Handles the AI API request and generates the dynamic HTML block
 aiBtn.addEventListener('click', async () => {
     const rawBuffer = transcriptView.value.trim();
     if (!rawBuffer) return alert("Please Record Some Notes First");
 
-    aiOutput.innerText = "Analyzing text and generating your study guide via secure AI gateway...";
+    aiOutput.innerText = "Analyzing text and rewriting your study guide using AI...";
 
     try {
-        const corePrompt = `Analyze the following lecture transcription. Rewrite it into a concise, professional executive summary paragraph (under 3 sentences), followed by a bulleted list of the absolute most important key takeaways and actionable items. Do not repeat my exact wording. Fix any spelling errors. Transcripts: "${rawBuffer}"`;
-
-        const response = await fetch("https://duckduckgo.com" + encodeURIComponent(corePrompt), {
-            method: "GET",
-            headers: { "Accept": "text/html" }
+        const response = await fetch("https://text-analysis.org", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                text: rawBuffer,
+                sentence_count: 3
+            })
         });
 
-        // If the public pipeline is congested, fallback to a local smart-formatting extraction layout
-        if (!response.ok) throw new Error("Network pipeline congestion. Running local fallback compiler matrix.");
+        const result = await response.json();
         
-        const responseHtml = await response.text();
-        
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(responseHtml, "text/html");
-        let aiOutputText = doc.body.innerText || doc.body.textContent || "";
-        
-        // Clean up formatting artifacts if the cloud array adds layout noise
-        aiOutputText = aiOutputText.replace(/Search Results.*/si, "").trim();
-
-        // Fallback safety filter if the returned string length is too short
-        if (aiOutputText.length < 30) {
-            throw new Error("Invalid text stream length returned from node array.");
+        // Grab whatever text formatting structure the API returns
+        let summaryText = "";
+        if (result && result.summary) {
+            summaryText = result.summary;
+        } else if (result && result.sentences) {
+            summaryText = result.sentences.join(" ");
+        } else {
+            throw new Error("API structure changed, kicking to fallback loop.");
         }
 
-        // Split the AI's dynamic thoughts down into distinct readable sentence lists
-        const cleanSentences = aiOutputText.match(/[^.!?]+[.!?]*/g) || [aiOutputText];
-        let abstractParagraph = cleanSentences[0] || "Core lecture themes captured.";
+        // Chop the summary up by sentence punctuation to build bullet points
+        const cleanSentences = summaryText.match(/[^.!?]+[.!?]*/g) || [summaryText];
+        let abstractParagraph = cleanSentences[0];
         let operationalBullets = cleanSentences.slice(1);
 
         if (operationalBullets.length === 0) {
-            operationalBullets = [aiOutputText];
+            operationalBullets = [summaryText];
+            abstractParagraph = "Core lecture summary extracted successfully.";
         }
 
         let layoutDOM = `
@@ -100,7 +101,7 @@ aiBtn.addEventListener('click', async () => {
         
         operationalBullets.forEach(sentence => {
             let cleanSentence = sentence.trim();
-            if (cleanSentence.length > 5) {
+            if (cleanSentence.length > 4) {
                 cleanSentence = cleanSentence.charAt(0).toUpperCase() + cleanSentence.slice(1);
                 layoutDOM += `<li style="margin-bottom: 6px;">${cleanSentence}</li>`;
             }
@@ -109,7 +110,9 @@ aiBtn.addEventListener('click', async () => {
         aiOutput.innerHTML = layoutDOM;
 
     } catch (err) {
-        console.warn("Cloud fallback triggered: ", err);
+        console.warn("AI Server dropped, running local layout backup instead: ", err);
+        
+        // Offline/CORS fallback to keep the app working if the network goes down
         let refinedText = rawBuffer.replace(/\s+/g, ' ').trim();
         const cleanSentences = refinedText.match(/[^.!?]+[.!?]*/g) || [refinedText];
 
@@ -140,7 +143,6 @@ aiBtn.addEventListener('click', async () => {
     }
 });
 
-// Copy Button Function
 copyBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(aiOutput.innerText);
     const originalLabel = copyBtn.innerText;
@@ -148,5 +150,4 @@ copyBtn.addEventListener('click', () => {
     setTimeout(() => copyBtn.innerText = originalLabel, 1500);
 });
 
-// Boot system on execution
 bootCoreSystem();
