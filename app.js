@@ -108,7 +108,10 @@ aiBtn.addEventListener('click', async () => {
         }
     } catch (err) {
         console.error(err);
-        aiOutput.innerText = 'An error occurred while analyzing text';
+        aiOutput.innerHTML = `
+            <div class="section-header" style="color: var(--laser-red);">System Compilation Error:</div>
+            <p style="color: #fda4af; margin: 5px 0 0 0;">${err.message || err}</p>
+        `;
     }
 });
 
