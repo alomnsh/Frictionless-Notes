@@ -55,49 +55,56 @@ transcriptionEngine.onresult = (event) => {
 startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; transcriptionEngine.start(); });
 stopBtn.addEventListener('click', () => { transcriptionEngine.stop(); });
 
-aiBtn.addEventListener('click', () => {
+aiBtn.addEventListener('click', async () => {
     const rawBuffer = transcriptView.value.trim();
     if (!rawBuffer) return alert("Please Record Some Notes First");
 
-    aiOutput.innerText = "Processing text locally on your device...";
+    aiOutput.innerText = "AI is reading and rewriting your notes locally...";
 
     try {
-        let refinedText = rawBuffer.replace(/\s+/g, ' ').trim();
-        
-        const cleanSentences = refinedText.match(/[^.!?]+[.!?]*/g) || [refinedText];
-
-        let abstractParagraph = "Core overview generated from transcription segment.";
-        if (cleanSentences.length > 0) {
-            abstractParagraph = cleanSentences[0];
-        }
-
-        let operationalBullets = [];
-        
-        if (cleanSentences.length > 1) {
-            operationalBullets = cleanSentences.slice(1);
-        } else {
-            operationalBullets = refinedText.split(/\b(?:because of|after that|so|tomorrow|and also)\b/i);
-        }
-
-        let layoutDOM = `
-            <div class="section-header">📝 Lecture Summary:</div>
-            <p style="margin: 0 0 16px 0; color: #d4d4d8;">${abstractParagraph.trim()}</p>
-            <div class="section-header">🎯 Key Points & Takeaways:</div>
-            <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
-        `;
-        
-        operationalBullets.forEach(sentence => {
-            let cleanSentence = sentence.trim();
-            if (cleanSentence.length > 3) {
-                cleanSentence = cleanSentence.charAt(0).toUpperCase() + cleanSentence.slice(1);
-                layoutDOM += `<li style="margin-bottom: 6px;">${cleanSentence}</li>`;
-            }
+        const modelResponse = await aiCoreModel(rawBuffer, { 
+            max_length: 90, 
+            min_length: 30,
+            do_sample: false 
         });
-        layoutDOM += `</ul>`;
         
-        // Push the compiled HTML straight to the view box
-        aiOutput.innerHTML = layoutDOM;
+        if (modelResponse && modelResponse[0] && modelResponse[0].summary_text) {
+            const aiText = modelResponse[0].summary_text;
 
+            const sentences = aiText.match(/[^.!?]+[.!?]*/g) || [aiText];
+            
+            // The first sentence becomes short the summary
+            let summaryParagraph = sentences[0];
+            
+            // The rest of the sentences automatically turn into clean key takeaways
+            let takeawayBullets = sentences.slice(1);
+            
+            // If the AI kept it super short, give it a clean baseline bullet point
+            if (takeawayBullets.length === 0) {
+                takeawayBullets = [aiText];
+                summaryParagraph = "Core discussion point extracted from lecture segment.";
+            }
+
+            let layoutDOM = `
+                <div class="section-header">📝 Lecture Summary:</div>
+                <p style="margin: 0 0 16px 0; color: #d4d4d8;">${summaryParagraph.trim()}</p>
+                <div class="section-header">🎯 Key Points & Takeaways:</div>
+                <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
+            `;
+            
+            takeawayBullets.forEach(bullet => {
+                let cleanBullet = bullet.trim();
+                if (cleanBullet.length > 3) {
+                    // Ensure each new point starts beautifully with a capital letter
+                    cleanBullet = cleanBullet.charAt(0).toUpperCase() + cleanBullet.slice(1);
+                    layoutDOM += `<li style="margin-bottom: 6px;">${cleanBullet}</li>`;
+                }
+            });
+            layoutDOM += `</ul>`;
+            aiOutput.innerHTML = layoutDOM;
+        } else {
+            aiOutput.innerText = "The local engine is processing. Please try clicking compile again.";
+        }
     } catch (err) {
         console.error(err);
         aiOutput.innerHTML = `
