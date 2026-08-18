@@ -9,7 +9,7 @@ async function bootCoreSystem() {
     try {
         badge.innerText = '🤖 Downloading AI model...';
         
-        const pipeline = targetpipeline || window.transformers.pipeline;
+        const pipeline = window.transformers.pipeline;
 
         aiCoreModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
