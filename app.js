@@ -8,7 +8,7 @@ async function bootCoreSystem() {
     try {
         badge.innerText = '📡 Connecting to AI Delivery Network...';
         
-        const transformersModule = await import('https://jsdelivr.net');
+        const transformersModule = await import('https://unpkg.com');
         const pipeline = transformersModule.pipeline;
 
         badge.innerText = '🤖 Downloading lightweight AI model...';
