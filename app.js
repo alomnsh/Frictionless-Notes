@@ -55,61 +55,53 @@ transcriptionEngine.onresult = (event) => {
 startBtn.addEventListener('click', () => { lectureTextBuffer = ''; transcriptView.value = ''; transcriptionEngine.start(); });
 stopBtn.addEventListener('click', () => { transcriptionEngine.stop(); });
 
-// Text Summaries
-aiBtn.addEventListener('click', async () => {
+aiBtn.addEventListener('click', () => {
     const rawBuffer = transcriptView.value.trim();
     if (!rawBuffer) return alert("Please Record Some Notes First");
 
-    aiOutput.innerText = "Processing text via private network endpoints...";
+    aiOutput.innerText = "Processing text locally on your device...";
 
     try {
-        const targetUrl = `https://googleapis.com{encodeURIComponent(rawBuffer)}`;
-        const response = await fetch(targetUrl);
-        const result = await response.json();
+        let refinedText = rawBuffer.replace(/\s+/g, ' ').trim();
+        
+        const cleanSentences = refinedText.match(/[^.!?]+[.!?]*/g) || [refinedText];
 
-        if (result && result[0]) {
-            let refinedText = "";
-            
-            for (let i = 0; i < result[0].length; i++) {
-                if (result[0][i] && result[0][i][0]) {
-                    refinedText += result[0][i][0] + " ";
-                }
-            }
-
-            // Split text blocks cleanly into sentence segments
-            const cleanSentences = refinedText.match(/[^.!?]+[.!?]+/g) || [refinedText];
-
-            let abstractParagraph = cleanSentences[0] || "Lecture discussion points captured.";
-            let operationalBullets = cleanSentences.slice(1);
-
-            // If it's a short test phrase, split it by common breaking points to create clean bullets
-            if (operationalBullets.length === 0 || refinedText.length < 60) {
-                operationalBullets = refinedText.split(/\b(?:because of|after that|so|tomorrow)\b/i);
-                abstractParagraph = "Core overview generated from transcription segment.";
-            }
-
-            let layoutDOM = `
-                <div class="section-header">📝 Lecture Summary:</div>
-                <p style="margin: 0 0 16px 0; color: #d4d4d8;">${abstractParagraph.trim()}</p>
-                <div class="section-header">🎯 Key Points & Takeaways:</div>
-                <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
-            `;
-            
-            operationalBullets.forEach(sentence => {
-                const cleanSentence = sentence.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim();
-                if (cleanSentence.length > 3) {
-                    layoutDOM += `<li style="margin-bottom: 6px;">${cleanSentence}</li>`;
-                }
-            });
-            layoutDOM += `</ul>`;
-            aiOutput.innerHTML = layoutDOM;
-        } else {
-            aiOutput.innerText = "The processing network is currently busy. Please try clicking compile again.";
+        let abstractParagraph = "Core overview generated from transcription segment.";
+        if (cleanSentences.length > 0) {
+            abstractParagraph = cleanSentences[0];
         }
+
+        let operationalBullets = [];
+        
+        if (cleanSentences.length > 1) {
+            operationalBullets = cleanSentences.slice(1);
+        } else {
+            operationalBullets = refinedText.split(/\b(?:because of|after that|so|tomorrow|and also)\b/i);
+        }
+
+        let layoutDOM = `
+            <div class="section-header">📝 Lecture Summary:</div>
+            <p style="margin: 0 0 16px 0; color: #d4d4d8;">${abstractParagraph.trim()}</p>
+            <div class="section-header">🎯 Key Points & Takeaways:</div>
+            <ul style="margin: 0; padding-left: 20px; color: #d4d4d8;">
+        `;
+        
+        operationalBullets.forEach(sentence => {
+            let cleanSentence = sentence.trim();
+            if (cleanSentence.length > 3) {
+                cleanSentence = cleanSentence.charAt(0).toUpperCase() + cleanSentence.slice(1);
+                layoutDOM += `<li style="margin-bottom: 6px;">${cleanSentence}</li>`;
+            }
+        });
+        layoutDOM += `</ul>`;
+        
+        // Push the compiled HTML straight to the view box
+        aiOutput.innerHTML = layoutDOM;
+
     } catch (err) {
         console.error(err);
         aiOutput.innerHTML = `
-            <div class="section-header" style="color: var(--laser-red);">System Compilation Error:</div>
+            <div class="section-header" style="color: var(--laser-red);">⚠️ System Compilation Error:</div>
             <p style="color: #fda4af; margin: 5px 0 0 0;">${err.message || err}</p>
         `;
     }
