@@ -6,7 +6,14 @@ async function bootCoreSystem() {
     const runButton = document.getElementById('ai-btn');
     const commsStatus = document.getElementById('comms-status');
     try {
-        aiCoreModel = await window.pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
+        badge.innerText = '📡 Connecting to AI Delivery Network...';
+        
+        const transformersModule = await import('https://jsdelivr.net');
+        const pipeline = transformersModule.pipeline;
+
+        badge.innerText = '🤖 Downloading lightweight AI model...';
+        
+        aiCoreModel = await pipeline('summarization', 'Xenova/distilbart-cnn-6-6');
 
         badge.style.borderColor = '#22c55e';
         badge.style.background = '#1b5e20';
